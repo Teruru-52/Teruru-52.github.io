@@ -16,8 +16,8 @@ $$u_{fb}=(k_{p_\omega}+k_{i_\omega}\dfrac{1}{s}+k_{d_\omega}\dfrac{s}{\tau s+1})
 フィードフォワード $$u_{ff}=\omega(t)P^{-1}(s)=\omega(t)\dfrac{3.2262s^2+3.10658s+1}{0.11081}=\dfrac{3.2262j_{\omega}(t)+3.10658a_{\omega}(t)+\omega(t)}{0.11081}$$
 2自由度制御 $$u_{\omega}=u_{ff}+u_{fb}$$</description></item><item><title>Site Map</title><link>https://teruru-52.github.io/site-map/</link><pubDate>Tue, 22 Mar 2022 04:11:10 +0900</pubDate><guid>https://teruru-52.github.io/site-map/</guid><description/></item><item><title>About</title><link>https://teruru-52.github.io/about/</link><pubDate>Tue, 22 Mar 2022 03:59:48 +0900</pubDate><guid>https://teruru-52.github.io/about/</guid><description>Profile Manager: Teruru
 はじめに Teruruです。電子工作、制御、プログラミング（C,C++,Python)によるものつくりを紹介していきます。
-過去作品 二輪倒立振子 フライホイール倒立振子 ドローン 作りたいもの アンプ 3次元倒立振子 ヘキサドローン倒立振子 クラシックマウス ロボトレース</description></item><item><title>IIRフィルタの設計</title><link>https://teruru-52.github.io/post/2022-03-22-iir-filter/</link><pubDate>Tue, 22 Mar 2022 03:48:06 +0900</pubDate><guid>https://teruru-52.github.io/post/2022-03-22-iir-filter/</guid><description>&amp;lt;script type=&amp;quot;text/x-mathjax-config&amp;quot;&amp;gt; MathJax.Hub.Config({tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}}); 低域のIIRフィルタを設計し、ジャイロセンサに適用します。ここではまずプロトタイプフィルタを考え、双1次z変換によって目的のフィルタを求める手法を用います。
+過去作品 二輪倒立振子 フライホイール倒立振子 ドローン 作りたいもの アンプ 3次元倒立振子 ヘキサドローン倒立振子 クラシックマウス ロボトレース</description></item><item><title>IIRフィルタの設計</title><link>https://teruru-52.github.io/post/2022-03-22-iir-filter/</link><pubDate>Tue, 22 Mar 2022 03:48:06 +0900</pubDate><guid>https://teruru-52.github.io/post/2022-03-22-iir-filter/</guid><description>低域のIIRフィルタを設計し、ジャイロセンサに適用します。ここではまずプロトタイプフィルタを考え、双1次z変換によって目的のフィルタを求める手法を用います。
 1. 設計仕様を与える カットオフ周波数を100Hz、阻止域端周波数を300Hz、阻止域減衰量を30dBとします。
 2. 正規化角周波数を求める サンプリング周期を1msとして正規化します。
-3. プロトタイプフィルタの次数を決定する $t_m$
+3. プロトタイプフィルタの次数を決定する $$t_m$$
 4. 双1次z変換で目的のフィルタを求める</description></item></channel></rss>
