@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>ディジタル信号処理 on Teruru Laboratory</title><link>https://teruru-52.github.io/tags/%E3%83%87%E3%82%A3%E3%82%B8%E3%82%BF%E3%83%AB%E4%BF%A1%E5%8F%B7%E5%87%A6%E7%90%86/</link><description>Recent content in ディジタル信号処理 on Teruru Laboratory</description><generator>Hugo -- gohugo.io</generator><language>ja-jp</language><lastBuildDate>Tue, 22 Mar 2022 03:48:06 +0900</lastBuildDate><atom:link href="https://teruru-52.github.io/tags/%E3%83%87%E3%82%A3%E3%82%B8%E3%82%BF%E3%83%AB%E4%BF%A1%E5%8F%B7%E5%87%A6%E7%90%86/index.xml" rel="self" type="application/rss+xml"/><item><title>IIRフィルタの設計</title><link>https://teruru-52.github.io/post/2022-03-22-iir-filter/</link><pubDate>Tue, 22 Mar 2022 03:48:06 +0900</pubDate><guid>https://teruru-52.github.io/post/2022-03-22-iir-filter/</guid><description>低域のIIRフィルタを設計し、ジャイロセンサに適用します。ここではまずプロトタイプフィルタを考え、双1次z変換によって目的のフィルタを求める手法を用います。
+1. 設計仕様を与える カットオフ周波数を100Hz、阻止域端周波数を300Hz、阻止域減衰量を30dBとします。
+2. 正規化角周波数を求める サンプリング周期を1msとして正規化します。
+3. プロトタイプフィルタの次数を決定する $t_m$
+4. 双1次z変換で目的のフィルタを求める</description></item></channel></rss>
