@@ -1,27 +1,67 @@
-<!doctype html><html class=no-js lang=en><head><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1"><meta http-equiv=x-ua-compatible content="IE=edge"><title>曲線加速を用いた超信地旋回 - Teruru Laboratory</title><script>(function(a,b){a[b]=a[b].replace("no-js","js")})(document.documentElement,"className")</script><meta name=description content><meta property="og:title" content="曲線加速を用いた超信地旋回"><meta property="og:description" content="MathJax.Hub.Config({tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}});  keriさんの記事を参考に曲線加速を設計しました.
-1. パラメータを決定する $t_1,t_2,t_3,j_m,a_m$を決定する. (ただし, $t_1=t_3-t_2=\dfrac{a_m}{j_m}$) とりあえずMATLABで描画しながら次のようにパラメータを決定しました.
+<!doctype html><html class=no-js lang=en><head><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1"><meta http-equiv=x-ua-compatible content="IE=edge"><title>曲線加速を用いた超信地旋回 - Teruru Laboratory</title><script>(function(a,b){a[b]=a[b].replace("no-js","js")})(document.documentElement,"className")</script><meta name=description content><meta property="og:title" content="曲線加速を用いた超信地旋回"><meta property="og:description" content="MathJax.Hub.Config({tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}});  なめらかな加速の設計を参考にしました。
+$\dfrac{\pi}{2}$だけ超信地旋回する際の曲線加速の設計に適用します。
+1. 目標値の関数を求める 角躍度, 角加速度, 角速度、角度の目標値をそれぞれ$j_{ref}(t), a_{ref}(t), \omega_{ref}(t), \theta_{ref}(t)$ とします。  $$ \begin{align} j_{ref}(t) & := \left\{ \begin{array}{ll} j_m & (0 2. パラメータを決定する $t_1,t_2,t_3,j_m,a_m$を決定するします。(ただし, $t_1=t_3-t_2=\dfrac{a_m}{j_m}$)
+とりあえずMATLABで描画しながら次のようにパラメータを決定しました。
 $$t_1=0.03[s]$$
 $$t_2=0.07[s]$$
 $$t_3=0.1[s]$$
 $$j_m=3500[rad/s^3]$$
 $$a_m=105[rad/s^2]$$
-これらを決定したとき$\omega_3=7.35[rad/s]$となりました.
-2. 速度の積分値が$\dfrac{\pi}{2}$となるように設計する 次のように時間$t$をおきます. 面積は次から求めました. $$S_1=\theta_3=\theta(t_3)=\omega_1(t_2-t_1)+\dfrac{1}{2}a_m(t_2-t_1)^2+\omega_3(t_3-t_2)$$
-$$S_2=\omega_3(t_4-t_3)$$
-$2S_1+S_2=\dfrac{\pi}{2}$となるように$t_4=213[ms]$と求めました. $t_4は$整数で求まらなかったので切り上げました.
-3.　マイコンで目標値を生成する マイコンで生成した目標値をMATLABでplotしました.
-角速度 角加速度 角躍度 4. 2自由度制御をする $$P(s)=\dfrac{0.11081}{3.2262s^2+3.10658s+1}$$
-フィードバック　($\omega(t)$が目標値, $\omega$が測定値です. 紛らわしくてすみません.) $$e_{\omega}=\omega(t)-\omega$$
-$$u_{fb}=(k_{p_\omega}+k_{i_\omega}\dfrac{1}{s}+k_{d_\omega}\dfrac{s}{\tau s+1})e_{\omega}$$
-フィードフォワード $$u_{ff}=\omega(t)P^{-1}(s)=\omega(t)\dfrac{3.2262s^2+3.10658s+1}{0.11081}=\dfrac{3.2262j_{\omega}(t)+3.10658a_{\omega}(t)+\omega(t)}{0.11081}$$
-2自由度制御 $$u_{\omega}=u_{ff}+u_{fb}$$"><meta property="og:type" content="article"><meta property="og:url" content="https://teruru-52.github.io/post/2022-03-22-rotation-curved-acceleration/"><meta property="article:section" content="post"><meta property="article:published_time" content="2022-03-22T04:36:23+09:00"><meta property="article:modified_time" content="2022-03-22T04:36:23+09:00"><link rel=preconnect href=https://fonts.gstatic.com crossorigin><link rel=dns-prefetch href=//fonts.googleapis.com><link rel=dns-prefetch href=//fonts.gstatic.com><link rel=stylesheet href="https://fonts.googleapis.com/css?family=Open+Sans:400,400i,700"><link rel=stylesheet href=/css/style.css><link rel="shortcut icon" href=/favicon.ico></head><body class=body><div class="container container--outer"><header class=header><div class="container header__container"><div class=logo><a class=logo__link href=/ title="Teruru Laboratory" rel=home><div class="logo__item logo__text"><div class=logo__title>Teruru Laboratory</div><div class=logo__tagline>ものつくり</div></div></a></div><nav class=menu><button class=menu__btn aria-haspopup=true aria-expanded=false tabindex=0>
+これらを決定したとき$\omega_3=7.35[rad/s]$となりました。
+3. 角速度の積分値が$\dfrac{\pi}{2}$となるように設計する 最大（一定）角速度$\omega_3$である時間で回転角を調整します。時刻$t_4$まで$\omega_3$であるとすると, 角速度の積分値となる面積$S$は次式で表されます。
+$$S=2\left\{\omega_1(t_2-t_1)+\dfrac{1}{2}a_m(t_2-t_1)^2+\omega_3(t_3-t_2)\right\}+\omega_3(t_4-t_3)$$ $S=\dfrac{\pi}{2}$となるように$t_4=213[ms]$と求めました。 $t_4は$整数で求まらなかったので四捨五入しました。
+$\pi$回転する超信地旋回では$S=\pi$として$t_4$を求めます。
+4.　マイコンで目標値を生成する マイコンで生成した目標値をMATLABでplotしました。
+角速度 角加速度 角躍度 5. 2自由度制御を設計する まず, 回転方向のシステム同定をします。 同定については以下の記事を参考にさせていただきました。
+マイクロマウスの機体を同定する
+MATLABでマイクロマウスの機体をシステム同定してPIDチューニングする
+1次の極をもつとして同定しました。 $$P_M(s)=\dfrac{K}{bs+1}$$ 2自由度制御によって目標値に追従させることにします。 $P_M^{-1}(s)$は非プロパーなので, 理論上では1次のフィルタを入れるなどしてフィードフォワードコントローラをプロパーにする必要がありますが, とりあえずフィルタを入れずに$F(s)=1$として考えます。
+フィードバック 角速度の誤差にPID制御をかけます。 $$e_{\omega}=\omega_{ref}-\omega$$"><meta property="og:type" content="article"><meta property="og:url" content="https://teruru-52.github.io/post/2022-03-22-rotation-curved-acceleration/"><meta property="article:section" content="post"><meta property="article:published_time" content="2022-03-22T04:36:23+09:00"><meta property="article:modified_time" content="2022-03-22T04:36:23+09:00"><link rel=preconnect href=https://fonts.gstatic.com crossorigin><link rel=dns-prefetch href=//fonts.googleapis.com><link rel=dns-prefetch href=//fonts.gstatic.com><link rel=stylesheet href="https://fonts.googleapis.com/css?family=Open+Sans:400,400i,700"><link rel=stylesheet href=/css/style.css><link rel="shortcut icon" href=/favicon.ico></head><body class=body><div class="container container--outer"><header class=header><div class="container header__container"><div class=logo><a class=logo__link href=/ title="Teruru Laboratory" rel=home><div class="logo__item logo__text"><div class=logo__title>Teruru Laboratory</div><div class=logo__tagline>ものつくり</div></div></a></div><nav class=menu><button class=menu__btn aria-haspopup=true aria-expanded=false tabindex=0>
 <span class=menu__btn-title tabindex=-1>Menu</span></button><ul class=menu__list><li class=menu__item><a class=menu__link href=/about/><span class=menu__text>About</span></a></li><li class=menu__item><a class=menu__link href=/site-map/><span class=menu__text>Site Map</span></a></li></ul></nav></div></header><div class="wrapper flex"><div class=primary><main class=main role=main><article class=post><header class=post__header><h1 class=post__title>曲線加速を用いた超信地旋回</h1><div class="post__meta meta"><div class="meta__item-datetime meta__item"><svg class="meta__icon icon icon-time" width="16" height="14" viewBox="0 0 30 28"><path d="M15 0C7 0 1 6 1 14s6 14 14 14 14-6 14-14S23 0 15 0zm0 25C9 25 4 20 4 14S9 3 15 3s11 5 11 11-5 11-11 11zm1-18h-2v8.4l6.8 4.4L22 18l-6-3.8V7z"/></svg><time class=meta__text datetime=2022-03-22T04:36:23+09:00>March 22, 2022</time></div><div class="meta__item-categories meta__item"><svg class="meta__icon icon icon-category" width="16" height="16" viewBox="0 0 16 16"><path d="m7 2 1 2h8v11H0V2z"/></svg><span class=meta__text><a class=meta__link href=/categories/%E6%8A%80%E8%A1%93%E8%B3%87%E6%96%99/ rel=category>技術資料</a></span></div></div></header><div class="content post__content clearfix"><script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.4/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script><script type=text/x-mathjax-config>
     MathJax.Hub.Config({tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}});
-</script><p><a href=https://www.kerislab.jp/posts/2018-04-29-accel-designer1/>keriさんの記事</a>を参考に曲線加速を設計しました.</p><h3 id=1-パラメータを決定する>1. パラメータを決定する</h3><p>$t_1,t_2,t_3,j_m,a_m$を決定する. (ただし, $t_1=t_3-t_2=\dfrac{a_m}{j_m}$)
-とりあえずMATLABで描画しながら次のようにパラメータを決定しました.</p><p>$$t_1=0.03[s]$$</p><p>$$t_2=0.07[s]$$</p><p>$$t_3=0.1[s]$$</p><p>$$j_m=3500[rad/s^3]$$</p><p>$$a_m=105[rad/s^2]$$</p><p>これらを決定したとき$\omega_3=7.35[rad/s]$となりました.</p><h3 id=2-速度の積分値がdfracpi2となるように設計する>2. 速度の積分値が$\dfrac{\pi}{2}$となるように設計する</h3><p>次のように時間$t$をおきます.
-<img src=https://i.imgur.com/UyYlHqy.png alt>
-面積は次から求めました.
-<img src=https://i.imgur.com/sJGaxyC.png alt></p><p>$$S_1=\theta_3=\theta(t_3)=\omega_1(t_2-t_1)+\dfrac{1}{2}a_m(t_2-t_1)^2+\omega_3(t_3-t_2)$$</p><p>$$S_2=\omega_3(t_4-t_3)$$</p><p>$2S_1+S_2=\dfrac{\pi}{2}$となるように$t_4=213[ms]$と求めました. $t_4は$整数で求まらなかったので切り上げました.</p><h3 id=3マイコンで目標値を生成する>3.　マイコンで目標値を生成する</h3><p>マイコンで生成した目標値をMATLABでplotしました.</p><h4 id=角速度>角速度</h4><p><img src=https://i.imgur.com/4EviluY.jpg alt></p><h4 id=角加速度>角加速度</h4><p><img src=https://i.imgur.com/LC3Smny.jpg alt></p><h4 id=角躍度>角躍度</h4><p><img src=https://i.imgur.com/TKDOxgI.jpg alt></p><h3 id=4-2自由度制御をする>4. 2自由度制御をする</h3><p>$$P(s)=\dfrac{0.11081}{3.2262s^2+3.10658s+1}$$</p><h4 id=フィードバックomegatが目標値-omegaが測定値です-紛らわしくてすみません>フィードバック　($\omega(t)$が目標値, $\omega$が測定値です. 紛らわしくてすみません.)</h4><p>$$e_{\omega}=\omega(t)-\omega$$</p><p>$$u_{fb}=(k_{p_\omega}+k_{i_\omega}\dfrac{1}{s}+k_{d_\omega}\dfrac{s}{\tau s+1})e_{\omega}$$</p><h4 id=フィードフォワード>フィードフォワード</h4><p>$$u_{ff}=\omega(t)P^{-1}(s)=\omega(t)\dfrac{3.2262s^2+3.10658s+1}{0.11081}=\dfrac{3.2262j_{\omega}(t)+3.10658a_{\omega}(t)+\omega(t)}{0.11081}$$</p><h4 id=2自由度制御>2自由度制御</h4><p>$$u_{\omega}=u_{ff}+u_{fb}$$</p></div><footer class=post__footer><div class="post__tags tags clearfix"><svg class="tags__badge icon icon-tag" width="16" height="16" viewBox="0 0 32 32"><path d="M32 19c0 1-1 2-1 2L21 31s-1 1-2 1-2-1-2-1L2 16c-1-1-1.4-2-1.4-2S0 12.5.0 11V3C0 1.5.8.8.8.8S1.5.0 3 0h8c1.5.0 3 .6 3 .6S15 1 16 2l15 15s1 1 1 2zM7 10a3 3 0 100-6 3 3 0 000 6z"/></svg><ul class=tags__list><li class=tags__item><a class="tags__link btn" href=/tags/%E3%82%AF%E3%83%A9%E3%82%B7%E3%83%83%E3%82%AF%E3%83%9E%E3%82%A6%E3%82%B9/ rel=tag>クラシックマウス</a></li><li class=tags__item><a class="tags__link btn" href=/tags/%E5%88%B6%E5%BE%A1%E5%B7%A5%E5%AD%A6/ rel=tag>制御工学</a></li></ul></div></footer></article></main><div class="authorbox clearfix"><figure class=authorbox__avatar><img alt="Teruru avatar" src=/img/avatar.jpeg class=avatar height=90 width=90></figure><div class=authorbox__header><span class=authorbox__name>About Teruru</span></div><div class=authorbox__description>Teruruです。電子工作、制御、プログラミング（C, C++, Python）によるものつくりをまとめていきます。</div></div><nav class="pager flex"><div class="pager__item pager__item--prev"><a class=pager__link href=/post/2022-03-22-iir-filter/ rel=prev><span class=pager__subtitle>«&#8201;Previous</span><p class=pager__title>IIRフィルタの設計</p></a></div></nav></div><aside class=sidebar><div class="widget-search widget"><form class=widget-search__form role=search method=get action=https://google.com/search><label><input class=widget-search__field type=search placeholder=SEARCH… name=q aria-label=SEARCH…></label>
+</script><p><a href=https://www.kerislab.jp/posts/2018-04-29-accel-designer1/>なめらかな加速の設計</a>を参考にしました。</p><p>$\dfrac{\pi}{2}$だけ超信地旋回する際の曲線加速の設計に適用します。</p><h3 id=1-目標値の関数を求める>1. 目標値の関数を求める</h3><p>角躍度, 角加速度, 角速度、角度の目標値をそれぞれ$j_{ref}(t), a_{ref}(t), \omega_{ref}(t), \theta_{ref}(t)$ とします。<div>$$
+\begin{align}
+j_{ref}(t)
+& :=
+    \left\{ \begin{array}{ll}
+j_m & (0 < t \le t_1)         \\
+      0 & (t_1 < t \le t_2)         \\
+    -j_m & (t_2 < t \le t_3)         \\
+    \end{array} \right.
+\\
+a_{ref}(t)
+& :=
+    \left\{ \begin{array}{ll}
+j_mt & (0 < t \le t_1)         \\
+      a_m & (t_1 < t \le t_2)         \\
+    -j_m(t-t_2) & (t_2 < t \le t_3)         \\
+    \end{array} \right.
+\\
+\omega_{ref}(t)
+& :=
+    \left\{ \begin{array}{ll}
+\frac{1}{2}j_mt^2 & (0 < t \le t_1)          \\
+     \omega_1 + a_m(t-t_1) & (t_1 < t \le t_2)          \\
+   \omega_3 - \frac{1}{2}j_m(t-t_3)^2 & (t_2 < t \le t_3)  
+    \end{array} \right.
+\\
+\theta_{ref}(t)
+& :=
+    \left\{ \begin{array}{ll}
+\frac{1}{6}j_mt^3 & (0 < t \le t_1)          \\
+     \theta_1 + \omega_1(t-t_1) + \frac{1}{2}a_m(t-t_1)^2 & (t_1 < t \le t_2)          \\
+   \theta_2 + \omega_3(t-t_2) - \frac{1}{6}j_m(t-t_2)^3 & (t_2 < t \le t_3)          \\
+   \end{array} \right.
+\end{align}
+$$</div></p><h3 id=2-パラメータを決定する>2. パラメータを決定する</h3><p>$t_1,t_2,t_3,j_m,a_m$を決定するします。(ただし, $t_1=t_3-t_2=\dfrac{a_m}{j_m}$)</p><p>とりあえずMATLABで描画しながら次のようにパラメータを決定しました。</p><p>$$t_1=0.03[s]$$</p><p>$$t_2=0.07[s]$$</p><p>$$t_3=0.1[s]$$</p><p>$$j_m=3500[rad/s^3]$$</p><p>$$a_m=105[rad/s^2]$$</p><p>これらを決定したとき$\omega_3=7.35[rad/s]$となりました。</p><h3 id=3-角速度の積分値がdfracpi2となるように設計する>3. 角速度の積分値が$\dfrac{\pi}{2}$となるように設計する</h3><p>最大（一定）角速度$\omega_3$である時間で回転角を調整します。時刻$t_4$まで$\omega_3$であるとすると, 角速度の積分値となる面積$S$は次式で表されます。</p>$$S=2\left\{\omega_1(t_2-t_1)+\dfrac{1}{2}a_m(t_2-t_1)^2+\omega_3(t_3-t_2)\right\}+\omega_3(t_4-t_3)$$<p>$S=\dfrac{\pi}{2}$となるように$t_4=213[ms]$と求めました。 $t_4は$整数で求まらなかったので四捨五入しました。</p><p>$\pi$回転する超信地旋回では$S=\pi$として$t_4$を求めます。</p><h3 id=4マイコンで目標値を生成する>4.　マイコンで目標値を生成する</h3><p>マイコンで生成した目標値をMATLABでplotしました。</p><h4 id=角速度>角速度</h4><p><img src=https://i.imgur.com/fd5fMnz.jpg alt></p><h4 id=角加速度>角加速度</h4><p><img src=https://i.imgur.com/to0MSOB.jpg alt></p><h4 id=角躍度>角躍度</h4><p><img src=https://i.imgur.com/T4scQ6A.jpg alt></p><h3 id=5-2自由度制御を設計する>5. 2自由度制御を設計する</h3><p>まず, 回転方向のシステム同定をします。
+同定については以下の記事を参考にさせていただきました。</p><p><a href=http://idken.net/posts/2017-06-02-systemident/>マイクロマウスの機体を同定する</a></p><p><a href=https://blog.oino.li/posts/matlabsystemidentification/>MATLABでマイクロマウスの機体をシステム同定してPIDチューニングする</a></p><p>1次の極をもつとして同定しました。
+$$P_M(s)=\dfrac{K}{bs+1}$$
+2自由度制御によって目標値に追従させることにします。
+<img src=https://i.imgur.com/ooxfSI4.png alt>
+$P_M^{-1}(s)$は非プロパーなので, 理論上では1次のフィルタを入れるなどしてフィードフォワードコントローラをプロパーにする必要がありますが, とりあえずフィルタを入れずに$F(s)=1$として考えます。</p><h4 id=フィードバック>フィードバック</h4><p>角速度の誤差にPID制御をかけます。
+$$e_{\omega}=\omega_{ref}-\omega$$</p><p>$$u_{fb}=C(s)e_\omega=(k_{p_\omega}+k_{i_\omega}\dfrac{1}{s}+k_{d_\omega}\dfrac{s}{\tau s+1})e_{\omega}$$</p><h4 id=フィードフォワード>フィードフォワード</h4><p>フィードバックのみでは追従性が悪いので, フィードフォワードを加えます。
+$$u_{ff}=\omega_{ref}P_M^{-1}(s)=\omega_{ref}\dfrac{bs+1}{K}=\dfrac{ba_{ref}+\omega_{ref}}{K}$$</p><h4 id=2自由度制御>2自由度制御</h4><p>$$u_{\omega}=u_{ff}+u_{fb}$$
+実際にはシステムを後退差分 $z=\dfrac{1}{1-Ts}$ で離散化しました。</p><h3 id=6-実機で実証する>6. 実機で実証する</h3></div><footer class=post__footer><div class="post__tags tags clearfix"><svg class="tags__badge icon icon-tag" width="16" height="16" viewBox="0 0 32 32"><path d="M32 19c0 1-1 2-1 2L21 31s-1 1-2 1-2-1-2-1L2 16c-1-1-1.4-2-1.4-2S0 12.5.0 11V3C0 1.5.8.8.8.8S1.5.0 3 0h8c1.5.0 3 .6 3 .6S15 1 16 2l15 15s1 1 1 2zM7 10a3 3 0 100-6 3 3 0 000 6z"/></svg><ul class=tags__list><li class=tags__item><a class="tags__link btn" href=/tags/%E3%82%AF%E3%83%A9%E3%82%B7%E3%83%83%E3%82%AF%E3%83%9E%E3%82%A6%E3%82%B9/ rel=tag>クラシックマウス</a></li><li class=tags__item><a class="tags__link btn" href=/tags/%E5%88%B6%E5%BE%A1%E5%B7%A5%E5%AD%A6/ rel=tag>制御工学</a></li></ul></div></footer></article></main><div class="authorbox clearfix"><figure class=authorbox__avatar><img alt="Teruru avatar" src=/img/avatar.jpeg class=avatar height=90 width=90></figure><div class=authorbox__header><span class=authorbox__name>About Teruru</span></div><div class=authorbox__description>Teruruです。電子工作、制御、プログラミング（C, C++, Python）によるものつくりをまとめていきます。</div></div><nav class="pager flex"><div class="pager__item pager__item--prev"><a class=pager__link href=/post/2022-03-22-iir-filter/ rel=prev><span class=pager__subtitle>«&#8201;Previous</span><p class=pager__title>IIRフィルタの設計</p></a></div></nav></div><aside class=sidebar><div class="widget-search widget"><form class=widget-search__form role=search method=get action=https://google.com/search><label><input class=widget-search__field type=search placeholder=SEARCH… name=q aria-label=SEARCH…></label>
 <input class=widget-search__submit type=submit value=Search>
 <input type=hidden name=sitesearch value=https://teruru-52.github.io/></form></div><div class="widget-recent widget"><h4 class=widget__title>Recent Posts</h4><div class=widget__content><ul class=widget__list><li class=widget__item><a class=widget__link href=/post/2022-03-22-rotation-curved-acceleration/>曲線加速を用いた超信地旋回</a></li><li class=widget__item><a class=widget__link href=/post/2022-03-22-iir-filter/>IIRフィルタの設計</a></li></ul></div></div><div class="widget-categories widget"><h4 class=widget__title>Categories</h4><div class=widget__content><ul class=widget__list><li class=widget__item><a class=widget__link href=/categories/%E6%8A%80%E8%A1%93%E8%B3%87%E6%96%99/>技術資料</a></li></ul></div></div><div class="widget-taglist widget"><h4 class=widget__title>Tags</h4><div class=widget__content><a class="widget-taglist__link widget__link btn" href=/tags/%E3%82%AF%E3%83%A9%E3%82%B7%E3%83%83%E3%82%AF%E3%83%9E%E3%82%A6%E3%82%B9/ title=クラシックマウス>クラシックマウス</a>
 <a class="widget-taglist__link widget__link btn" href=/tags/%E3%83%87%E3%82%A3%E3%82%B8%E3%82%BF%E3%83%AB%E4%BF%A1%E5%8F%B7%E5%87%A6%E7%90%86/ title=ディジタル信号処理>ディジタル信号処理</a>
