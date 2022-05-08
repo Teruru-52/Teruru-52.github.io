@@ -1,0 +1,117 @@
+<!doctype html><html class=no-js lang=en><head><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1"><meta http-equiv=x-ua-compatible content="IE=edge"><title>Kanamaya Control Methodを用いたスラローム走行 - Teruru Laboratory</title><script>(function(a,b){a[b]=a[b].replace("no-js","js")})(document.documentElement,"className")</script><meta name=description content="Kanayama Control Methodを用いてスラローム走行を設計します。"><meta property="og:title" content="Kanamaya Control Methodを用いたスラローム走行"><meta property="og:description" content="Kanayama Control Methodを用いてスラローム走行を設計します。"><meta property="og:type" content="article"><meta property="og:url" content="https://teruru-52.github.io/post/2022-05-08-kanamaya-control-method/"><meta property="article:section" content="post"><meta property="article:published_time" content="2022-05-08T08:59:53+09:00"><meta property="article:modified_time" content="2022-05-08T08:59:53+09:00"><link rel=preconnect href=https://fonts.gstatic.com crossorigin><link rel=dns-prefetch href=//fonts.googleapis.com><link rel=dns-prefetch href=//fonts.gstatic.com><link rel=stylesheet href="https://fonts.googleapis.com/css?family=Open+Sans:400,400i,700"><link rel=stylesheet href=/css/style.css><link rel="shortcut icon" href=/favicon.ico></head><body class=body><div class="container container--outer"><header class=header><div class="container header__container"><div class=logo><a class=logo__link href=/ title="Teruru Laboratory" rel=home><div class="logo__item logo__text"><div class=logo__title>Teruru Laboratory</div><div class=logo__tagline>ものつくり</div></div></a></div><nav class=menu><button class=menu__btn aria-haspopup=true aria-expanded=false tabindex=0>
+<span class=menu__btn-title tabindex=-1>Menu</span></button><ul class=menu__list><li class=menu__item><a class=menu__link href=/about/><span class=menu__text>About</span></a></li><li class=menu__item><a class=menu__link href=/site-map/><span class=menu__text>Site Map</span></a></li></ul></nav></div></header><div class="wrapper flex"><div class=primary><main class=main role=main><article class=post><header class=post__header><h1 class=post__title>Kanamaya Control Methodを用いたスラローム走行</h1><div class="post__meta meta"><div class="meta__item-datetime meta__item"><svg class="meta__icon icon icon-time" width="16" height="14" viewBox="0 0 30 28"><path d="M15 0C7 0 1 6 1 14s6 14 14 14 14-6 14-14S23 0 15 0zm0 25C9 25 4 20 4 14S9 3 15 3s11 5 11 11-5 11-11 11zm1-18h-2v8.4l6.8 4.4L22 18l-6-3.8V7z"/></svg><time class=meta__text datetime=2022-05-08T08:59:53+09:00>May 08, 2022</time></div><div class="meta__item-categories meta__item"><svg class="meta__icon icon icon-category" width="16" height="16" viewBox="0 0 16 16"><path d="m7 2 1 2h8v11H0V2z"/></svg><span class=meta__text><a class=meta__link href=/categories/%E6%8A%80%E8%A1%93%E8%B3%87%E6%96%99/ rel=category>技術資料</a></span></div></div></header><figure class="post__thumbnail thumbnail"><img class=thumbnail__image src=/posts/2022-05-08-kanamaya-control-method/kanayama.PNG alt="Kanamaya Control Methodを用いたスラローム走行"></figure><div class="content post__content clearfix"><p>Kanayama Control Methodを用いてスラローム走行を設計します。</p><script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.4/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script><script type=text/x-mathjax-config>
+    MathJax.Hub.Config({tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}});
+</script><h3 id=1-kanayama-control-methodとは>1. Kanayama Control Methodとは</h3><p>Kanayama Control Methodは独立二輪車のような非ホロノミック系において，目標軌道に追従させる制御手法のことです。</p><p>マイクロマウスも非ホロノミック系であり，Kanayama Control Methodを適用していきます．</p><p>この記事では以下を参考にしています。</p><p><a href=https://www03.core.ac.uk/download/pdf/36732512.pdf>https://www03.core.ac.uk/download/pdf/36732512.pdf</a></p><h3 id=2-理論を理解する>2. 理論を理解する</h3><h4 id=21-最低限必要な理解>2.1 最低限必要な理解</h4><p>絶対座標系での位置を$p=[x,y,\theta]^\text{T}$，その目標値を$p_r=[x_r,y_r,\theta_r]^\text{T}$とします。</p><p>並進速度$v$，回転速度$\omega$をまとめたベクトルを$q=[v, \omega]^\text{T}$，その目標値を$q_r=[v_r, \omega_r]^\text{T}$とします。$v,\omega$は絶対座標，機体座標系で共通となります。</p><p>絶対座標系での位置$p$の微分$\dot p$は</p>$$
+\dot p=\left[
+\begin{matrix}
+\dot x \\
+\dot y \\
+\dot\theta
+\end{matrix}
+\right]=
+\left[
+\begin{matrix}
+v\ \text{cos}\theta \\
+v\ \text{sin}\theta \\
+\omega
+\end{matrix}
+\right]
+$$<p>と表されます。</p><p>現在の状態を$p_c=[x_c,y_c,\theta_c]^\text{T}$，$\dot p_c=[\dot x_c,\dot y_c,\dot \theta_c]^\text{T}$，$q_c=[v_c, \omega_c]^\text{T}$とすると，
+機体座標系での位置の誤差$p_e=[x_e,y_e,\theta_e]^\text{T}$は次のように表されます。</p><p><img src=https://i.imgur.com/QZ0wGNx.png alt></p>$$
+p_e=\left[
+\begin{matrix}
+x_e \\
+y_e \\
+\theta_e
+\end{matrix}
+\right]=
+\left[
+\begin{matrix}
+(x_r - x_c)\text{cos}\theta_c + (y_r - y_c) \text{sin}\theta_c \\
+-(x_r - x_c)\text{sin}\theta_c + (y_r - y_c) \text{cos}\theta_c \\
+\theta_r - \theta_c
+\end{matrix}
+\right]
+$$<p>機体座標系での位置の誤差の微分$\dot p_e=[\dot x_e,\dot y_e,\dot\theta_e]^\text{T}$は</p>$$
+\dot p_e=\left[
+\begin{matrix}
+\dot x_e \\
+\dot y_e \\
+\dot\theta_e
+\end{matrix}
+\right]=
+\left[
+\begin{matrix}
+y_e \omega_c - v_c + v_r\text{cos}\theta_e \\
+-x_e\omega_c + v_r\text{sin}\theta_e \\
+\omega_r - \omega_c
+\end{matrix}
+\right]
+$$<p>となります。導出については資料にあります。</p><p>Kanayama Control Methodでは，誤差$p_e$を$[0,0,0]^\text{T}$に漸近収束させる速度入力$q$には</p>$$
+q=\left[
+\begin{matrix}
+v \\
+\omega
+\end{matrix}
+\right]=
+\left[
+\begin{matrix}
+v_c \\
+\omega_c
+\end{matrix}
+\right]=
+\left[
+\begin{matrix}
+v_r\text{cos}\theta_e + K_x x_e \\
+\omega_r + v_r(K_y y_e + K_\theta \text{sin}\theta_e)
+\end{matrix}
+\right]
+$$<p>があると証明されています。$K_x,K_y,K_\theta >0$はパラメータです。</p><p>とりあえず入力をこのようにするのだと思えば利用できます。</p><h4 id=22-漸近安定の証明>2.2 漸近安定の証明</h4><p>$q$がLyapunov安定性を満たす入力であることが示されています。</p><p>まず，速度入力を$q$としたときの誤差の微分$\dot p_e$は</p>$$
+\dot p_e=\left[
+\begin{matrix}
+\dot x_e \\
+\dot y_e \\
+\dot\theta_e
+\end{matrix}
+\right]=
+\left[
+\begin{matrix}
+\{\omega_r + v_r(K_y y_e + K_\theta \text{sin}\theta_e)\}y_e - K_x x_e\\
+-\{\omega_r + v_r(K_y y_e + K_\theta \text{sin}\theta_e)\}x_e + v_r\text{sin}\theta_e \\
+-v_r(K_y y_e + K_\theta\text{sin}\theta)
+\end{matrix}
+\right]
+$$<p>となります。</p><p>Lyapunov関数$V$を</p><p>$$V = \dfrac{1}{2}(x_e^2 + y_e^2) + \dfrac{1}{K_y}(1 - \text{cos}\theta_e)$$</p><p>とすると，その微分は</p><p>$$\dot V = x_e\dot x_e + y_e \dot y_e + \dfrac{1}{K_y}\dot\theta_e\text{sin}\theta_e
+= -K_x x_e^2 - \dfrac{K_\theta}{K_y}v_r\text{sin}^2\theta_e \leq 0$$</p><p>となり，$\dot V$が平衡点$q_e=[0,0,0]^\text{T}$以外で常に負となればシステムは平衡点に漸近しますが，この式からは
+$q_e=[0,y_e,0]^\text{T}$においても$\dot V = 0$を満たす可能性があるため平衡点に漸近するとは言えません。</p><p>そこで，平衡点周りで線形近似したシステムに対してRouth-Hurbitsの安定判別法を適用し，システムが安定であれば平衡点に漸近すると言えます。テイラー展開で1次線形化したシステムは</p>$$
+\dot p_e=\left[
+\begin{matrix} \dot x_e \\ \dot y_e \\ \dot\theta_e \end{matrix}
+\right]=
+\left[
+\begin{matrix} -K_x & \omega_r & 0 \\ -\omega_r & 0  & v_r \\ 0 & -v_rK_y & -v_rK_\theta \end{matrix}
+\right]
+\left[
+\begin{matrix} x_e \\ y_e \\ \theta_e \end{matrix}
+\right]\equiv Ap_e
+$$<p>であり，その特性方程式は</p><p>$$|Is-A|=0$$</p><p>より</p><p>$$a_3s^3 + a_2s^2 + a_1s + a_0=0$$</p><p>$$
+\left\{
+\begin{array}{l}
+a_3 =& 1\\
+    a_2 =& K_\theta v_r + K_x \\
+a_1 =& K_yv_r^2 + K_xK_\theta v_r + \omega_r^2\\
+a_0 =& K_xK_yv_r^2 + \omega_r^2K_\theta v_r
+\end{array}
+\right.
+$$
+となります。$a_3=1$となるように整理してあります。</p><p>Hurbits行列式$H$は
+$$
+H=\left|
+\begin{matrix} a_1 & a_3\\ a_0 & a_2 \end{matrix}
+\right|=a_1a_2 - a_0a_3 > 0
+$$</p><p>となり，$a_3,a_2,a_1,a_0 > 0$かつ$H>0$であるため，システムは安定となります。</p><p>よって，速度入力$q$はシステムを平衡点$q_e=[0,0,0]^\text{T}$に漸近させることが証明されました。</p><h3 id=3-全体的なシステム>3. 全体的なシステム</h3><p>Kanayama Control Methodで求めた速度入力$v,\omega$を目標値として2自由度制御に渡します。</p><p><img src=https://i.imgur.com/BK9gYIH.png alt></p><h3 id=4-目標軌道を生成する>4. 目標軌道を生成する</h3><p><a href=https://www.kerislab.jp/posts/2017-09-04-matlab-trajectory/>MATLABでスラローム軌道生成</a>を参考にします．
+今後追記します。</p><h3 id=5-実装する>5. 実装する</h3><p>今後追記します。</p></div><footer class=post__footer><div class="post__tags tags clearfix"><svg class="tags__badge icon icon-tag" width="16" height="16" viewBox="0 0 32 32"><path d="M32 19c0 1-1 2-1 2L21 31s-1 1-2 1-2-1-2-1L2 16c-1-1-1.4-2-1.4-2S0 12.5.0 11V3C0 1.5.8.8.8.8S1.5.0 3 0h8c1.5.0 3 .6 3 .6S15 1 16 2l15 15s1 1 1 2zM7 10a3 3 0 100-6 3 3 0 000 6z"/></svg><ul class=tags__list><li class=tags__item><a class="tags__link btn" href=/tags/%E3%82%AF%E3%83%A9%E3%82%B7%E3%83%83%E3%82%AF%E3%83%9E%E3%82%A6%E3%82%B9/ rel=tag>クラシックマウス</a></li><li class=tags__item><a class="tags__link btn" href=/tags/%E5%88%B6%E5%BE%A1%E5%B7%A5%E5%AD%A6/ rel=tag>制御工学</a></li></ul></div></footer></article></main><div class="authorbox clearfix"><figure class=authorbox__avatar><img alt="Teruru avatar" src=/img/avatar.jpeg class=avatar height=90 width=90></figure><div class=authorbox__header><span class=authorbox__name>About Teruru</span></div><div class=authorbox__description>Teruruです。電子工作、制御、プログラミング（C, C++, Python）によるものつくりをまとめていきます。</div></div><nav class="pager flex"><div class="pager__item pager__item--prev"><a class=pager__link href=/post/2022-04-20-m-sequence/ rel=prev><span class=pager__subtitle>«&#8201;Previous</span><p class=pager__title>M系列信号を用いたシステム同定</p></a></div></nav></div><aside class=sidebar><div class="widget-search widget"><form class=widget-search__form role=search method=get action=https://google.com/search><label><input class=widget-search__field type=search placeholder=SEARCH… name=q aria-label=SEARCH…></label>
+<input class=widget-search__submit type=submit value=Search>
+<input type=hidden name=sitesearch value=https://teruru-52.github.io/></form></div><div class="widget-recent widget"><h4 class=widget__title>Recent Posts</h4><div class=widget__content><ul class=widget__list><li class=widget__item><a class=widget__link href=/post/2022-05-08-kanamaya-control-method/>Kanamaya Control Methodを用いたスラローム走行</a></li><li class=widget__item><a class=widget__link href=/post/2022-04-20-m-sequence/>M系列信号を用いたシステム同定</a></li><li class=widget__item><a class=widget__link href=/post/2022-03-22-rotation-curved-acceleration/>曲線加速を用いた超信地旋回</a></li><li class=widget__item><a class=widget__link href=/post/2022-03-22-iir-filter/>IIRフィルタの設計</a></li></ul></div></div><div class="widget-categories widget"><h4 class=widget__title>Categories</h4><div class=widget__content><ul class=widget__list><li class=widget__item><a class=widget__link href=/categories/%E6%8A%80%E8%A1%93%E8%B3%87%E6%96%99/>技術資料</a></li></ul></div></div><div class="widget-taglist widget"><h4 class=widget__title>Tags</h4><div class=widget__content><a class="widget-taglist__link widget__link btn" href=/tags/%E3%82%AF%E3%83%A9%E3%82%B7%E3%83%83%E3%82%AF%E3%83%9E%E3%82%A6%E3%82%B9/ title=クラシックマウス>クラシックマウス</a>
+<a class="widget-taglist__link widget__link btn" href=/tags/%E3%83%87%E3%82%A3%E3%82%B8%E3%82%BF%E3%83%AB%E4%BF%A1%E5%8F%B7%E5%87%A6%E7%90%86/ title=ディジタル信号処理>ディジタル信号処理</a>
+<a class="widget-taglist__link widget__link btn" href=/tags/%E5%88%B6%E5%BE%A1%E5%B7%A5%E5%AD%A6/ title=制御工学>制御工学</a></div></div></aside></div><footer class=footer><div class="container footer__container flex"><div class=footer__copyright>&copy; 2022 Teruru Laboratory.
+<span class=footer__copyright-credits>Generated with <a href=https://gohugo.io/ rel="nofollow noopener" target=_blank>Hugo</a> and <a href=https://github.com/Vimux/Mainroad/ rel="nofollow noopener" target=_blank>Mainroad</a> theme.</span></div></div></footer></div><script async defer src=/js/menu.js></script></body></html>
