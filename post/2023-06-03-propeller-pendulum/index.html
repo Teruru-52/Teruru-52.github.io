@@ -3,7 +3,7 @@
     MathJax.Hub.Config({tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}});
 </script><h3 id=1-プロペラの方向最適化>1. プロペラの方向最適化</h3><p>最初に記述した参考文献では，機体重心にかかる力と重心周りのトルクのL2ノルムが最大になるようにプロペラの方向が最適化されています。</p><p>今回は倒立振子を考えるので，回転中心は重心ではなく立方体の頂点です。
 また，目的は倒立なので頂点にかかる力は考える必要がありません。
-そのため，この方向最適化は倒立には不適切ですが，倒立に要するトルクは十分足りているので良しとしています。</p><h3 id=2-機体作成>2. 機体作成</h3><table><thead><tr><th></th><th></th></tr></thead><tbody><tr><td>マイコン</td><td>STM32F446RE</td></tr><tr><td>IMU</td><td>MPU-9250</td></tr><tr><td>モータ</td><td>小型ドローン用DCモータ × 8　</td></tr><tr><td>電源</td><td>Lipo 2S 240mAh</td></tr></tbody></table><p>カーボンロッドを繋いで立方体としています。
+そのため，この方向最適化は倒立には不適切ですが，倒立に要するトルクは十分足りているので良しとしています。</p><figure><img src=/posts/2023-06-03-propeller-pendulum/torque_space.jpg><figcaption><h4>Torque Set</h4></figcaption></figure><h3 id=2-機体作成>2. 機体作成</h3><table><thead><tr><th></th><th></th></tr></thead><tbody><tr><td>マイコン</td><td>STM32F446RE</td></tr><tr><td>IMU</td><td>MPU-9250</td></tr><tr><td>モータ</td><td>小型ドローン用DCモータ × 8　</td></tr><tr><td>電源</td><td>Lipo 2S 240mAh</td></tr></tbody></table><p>カーボンロッドを繋いで立方体としています。
 回路基板は4枚で，組み合わせて小さな立方体になるようにしました。</p><h3 id=3-姿勢推定>3. 姿勢推定</h3><p>以下の2つを実装して，どちらかを使うようにしています。</p><ul><li>Madgwick Filter</li><li>Extended Kalman Filter (EKF)</li></ul><p><a href=Madgwick%E3%83%95%E3%82%A3%E3%83%AB%E3%82%BF%E3%81%A7%E3%82%AF%E3%82%A9%E3%83%BC%E3%82%BF%E3%83%8B%E3%82%AA%E3%83%B3%E3%82%92%E6%8E%A8%E5%AE%9A%E3%81%99%E3%82%8B>Madgwickフィルタでクォータニオンを推定する</a>・
 <a href=https://teruru-52.github.io/post/2023-07-19-ekf-quaternion/>EKFでクォータニオンを推定する</a>
 に記述しています。</p><h3 id=4-姿勢制御>4. 姿勢制御</h3><ul><li>Nonlinear Attitude Control</li></ul><p>参考文献に載っていたもので，クォータニオンを用いた制御です。
