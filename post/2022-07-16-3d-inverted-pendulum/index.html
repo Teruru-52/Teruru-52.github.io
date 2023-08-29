@@ -58,8 +58,7 @@ $$</p><p>$$
 u^\prime_{y} = -\dfrac{1}{\sqrt6}u_x+\dfrac{1}{\sqrt2}u_y-\dfrac{1}{\sqrt3}u_z
 $$</p><p>$$
 u^\prime_{z} = -\dfrac{1}{\sqrt6}u_x-\dfrac{1}{\sqrt2}u_y-\dfrac{1}{\sqrt3}u_z
-$$</p><p>この$u'$となるように各ホイールに割り当てます。
-制御周期$10\ \text{ms}$程度で制御しています。</p><h3 id=4-kalman-filter>4. Kalman Filter</h3><p>用いたIMUであるMPU-6050は6軸センサなので，加速度と角速度を取得できます。</p><p>まず，加速度から直接$\theta_x,\ \theta_y$を求めます。</p>$$
+$$</p><p>としてホイールに入力します。</p><p>制御周期$10\ \text{ms}$程度で制御しています。</p><h3 id=4-kalman-filter>4. Kalman Filter</h3><p>用いたIMUであるMPU-6050は6軸センサなので，加速度と角速度を取得できます。</p><p>まず，加速度から直接$\theta_x,\ \theta_y$を求めます。</p>$$
 \theta_x=\tan^{-1}\dfrac{a_y}{\sqrt{a_x^2 + a_z^2}},\quad \theta_y= \tan^{-1}\dfrac{a_x}{\sqrt{a_y^2 + a_z^2}}
 $$<p>差分方程式は，角速度と組み合わせて以下のようになります。</p><p>$$
 \theta_{k+1}=\theta_k+(\omega_k-\omega_{\text{bias},k})\Delta{t},\quad \omega_{\text{bias},k+1}=\omega_{\text{bias},k}
