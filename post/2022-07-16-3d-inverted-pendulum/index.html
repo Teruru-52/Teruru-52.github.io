@@ -4,26 +4,84 @@
 </script><h3 id=1-回路>1. 回路</h3><p><a href=https://shop.homemadegarbage.com/product-category/hmg/>HomeMadeGarbage</a>さんのものを使わせていただいています。</p><table><thead><tr><th></th><th></th></tr></thead><tbody><tr><td>マイコン</td><td>ESP32</td></tr><tr><td>IMU</td><td>MPU-6050</td></tr><tr><td>モータ</td><td>BLDC × 3　</td></tr><tr><td>電源</td><td>ACアダプタ 24V 5A</td></tr></tbody></table><p>BLDCはAmazonで購入したものです。入力のPWMにおよそ比例して速度が出力されます。
 プログラムも販売されていますが，一部のピン設定を除きC++で1から書きました。</p><h3 id=2-機体>2. 機体</h3><p><a href="https://www.youtube.com/watch?v=AJQZFHJzwt4&list=LL&index=10&t=263s">ReM-RC</a>さんのものを使わせていただいています。</p><h3 id=3-制御>3. 制御</h3><h4 id=31-pd制御>3.1 PD制御</h4><p>倒立状態からの$x$軸周りの傾き角とその角速度を$\theta_x,\omega_x$とし，$y$軸についても同様に$\theta_y,\omega_y$とします。</p><p>HomeMadeGarbageさんとReM-RCさんの倒立振子とはセンサーの位置を変えて，頂点で倒立時にセンサの$xy$平面が地面と水平($\theta_x=0$，$\theta_y=0$)になるようにしています。</p><p>まずは，このセンサ座標系における入力$u$を考えます。
 PD制御に加え，入力の積分値をフィードバックします。
-入力の積分値を考慮することで，ホイールの速度が大きくなりすぎないようにしています。</p><p>$$u_x(k)=k_1\hat\theta_x(k)+k_2\hat\omega_x(k)+k_3\sum_{i=0}^{k-1}u_x(i)$$</p><p>$$u_y(k)=k_1\hat\theta_y(k)+k_2\hat\omega_y(k)+k_3\sum_{i=0}^{k-1}u_y(i)$$</p><p>$$u_z(k) = 0$$</p><p>$k_1,k_2,k_3$はゲインです。姿勢角$\hat\theta_x,\hat\theta_y$とその角速度$\hat\omega_x,\hat\omega_y$は定常カルマンフィルタによって推定しています。とりあえず倒立できればいいので，$u_z=0$としています。</p><h4 id=32-入力分配>3.2 入力分配</h4><p>入力$u_x,u_y,u_z$を3つのホイールに分配します。センサ座標系$xyz$での入力$u_x,u_y,u_z$をホイール座標$x&rsquo;y&rsquo;z'$での各ホイールの入力$u^\prime_{x},u^\prime_{y},u^\prime_{z}$に分配します。</p>$$
-u_xx+u_yy+u_zz=u^\prime_{x}x'+u^\prime_{y}y'+u^\prime_{z}z'
-$$<p>$$
-x = \dfrac{-y'-z'+2x'}{\sqrt6}
-$$</p><p>$$
-y = \dfrac{y'-z'}{\sqrt2}
-$$</p><p>$$
-z = -\dfrac{x'+y'+z'}{\sqrt3}
-$$</p><p>より，</p><p>$$
+入力の積分値を考慮することで，ホイールの速度が大きくなりすぎないようにしています。</p><p>$$u_x(k)=k_1\hat\theta_x(k)+k_2\hat\omega_x(k)+k_3\sum_{i=0}^{k-1}u_x(i)$$</p><p>$$u_y(k)=k_1\hat\theta_y(k)+k_2\hat\omega_y(k)+k_3\sum_{i=0}^{k-1}u_y(i)$$</p><p>$$u_z(k) = 0$$</p><p>$k_1,k_2,k_3$はゲインです。姿勢角$\hat\theta_x,\hat\theta_y$とその角速度$\hat\omega_x,\hat\omega_y$は定常カルマンフィルタによって推定しています。とりあえず倒立できればいいので，$u_z=0$としています。</p><h4 id=32-入力分配>3.2 入力分配</h4><p>入力$u_x,u_y,u_z$を3つのホイールに分配します。センサ座標系$xyz$での入力$u_x,u_y,u_z$をホイール座標$x&rsquo;y&rsquo;z'$での各ホイールの入力$u^\prime_{x},u^\prime_{y},u^\prime_{z}$に分配します。</p><p>まず，センサ座標系$xyz$とホイール座標系$x&rsquo;y&rsquo;z'$を一致させる回転行列$R$を考えます。</p>$$
+\left[
+\begin{matrix}
+x^\prime\\
+y^\prime\\
+-z^\prime\\
+\end{matrix}
+\right]=R
+\left[
+\begin{matrix}
+x\\
+y\\
+z\\
+\end{matrix}
+\right]
+$$
+$-z^\prime$となっているのは，ホイール座標が左手座標系になっていたためです。考えやすいように$z$軸を反転して，右手座標系で統一します。
+この回転は，$y$軸周りに$\beta=\dfrac{\pi}{2}-\cos^{-1}\dfrac{1}{\sqrt{3}}$回転した後，
+回転後の$x^\prime$軸周りに$\alpha=-\dfrac{\pi}{4}$回転させるものになります。
+$$
+R=R_xR_y
+$$
+$$
+R_x=\left[
+\begin{matrix}
+1 & 0 & 0\\
+    0 & \cos\alpha &\sin\alpha\\
+0 & -\sin\alpha& \cos\alpha
+\end{matrix}
+\right],\quad
+R_y=\left[
+\begin{matrix}
+\cos\beta& 0 &-\sin\alpha\\
+    0 & 1 & 0\\
+\sin\beta & 0 & \cos\beta
+\end{matrix}
+\right]
+$$<figure><img src=/posts/2022-07-16-3d-inverted-pendulum/matlab_rotation.jpg></figure>そして，$u^\prime_{x},u^\prime_{y},u^\prime_{z}$を求めます。
+$$
+\left[
+\begin{matrix}
+u^\prime_{x}\\
+u^\prime_{y}\\
+-u^\prime_{z}
+\end{matrix}
+\right]=R
+\left[
+\begin{matrix}
+u_x\\
+u_y\\
+u_z\\
+\end{matrix}
+\right]
+$$
+より，
+$$
 u_{x'} = \dfrac{2}{\sqrt6}u_x-\dfrac{1}{\sqrt3}u_z
-$$</p><p>$$
+$$
+$$
 u^\prime_{y} = -\dfrac{1}{\sqrt6}u_x+\dfrac{1}{\sqrt2}u_y-\dfrac{1}{\sqrt3}u_z
-$$</p><p>$$
+$$
+$$
 u^\prime_{z} = -\dfrac{1}{\sqrt6}u_x-\dfrac{1}{\sqrt2}u_y-\dfrac{1}{\sqrt3}u_z
-$$</p><p>としてホイールに入力します。
-制御周期$10\ \text{ms}$程度で制御しています。</p><h3 id=4-kalman-filter>4. Kalman Filter</h3><p>用いたIMUであるMPU-6050は6軸センサなので，加速度と角速度を取得できます。</p><p>まず，加速度から直接$\theta_x,\ \theta_y$を求めます。</p>$$
+$$
+この回転入力$u'$となるように各ホイールに割り当てます。
+制御周期$10\ \text{ms}$程度で制御しています。
+### 4. Kalman Filter
+用いたIMUであるMPU-6050は6軸センサなので，加速度と角速度を取得できます。
+まず，加速度から直接$\theta_x,\ \theta_y$を求めます。
+$$
 \theta_x=\tan^{-1}\dfrac{a_y}{\sqrt{a_x^2 + a_z^2}},\quad \theta_y= \tan^{-1}\dfrac{a_x}{\sqrt{a_y^2 + a_z^2}}
-$$<p>差分方程式は，角速度と組み合わせて以下のようになります。</p><p>$$
+$$
+差分方程式は，角速度と組み合わせて以下のようになります。
+$$
 \theta_{k+1}=\theta_k+(\omega_k-\omega_{\text{bias},k})\Delta{t},\quad \omega_{\text{bias},k+1}=\omega_{\text{bias},k}
-$$</p><p>状態方程式で表現すると，</p>$$
+$$
+状態方程式で表現すると，
+$$
 \left[
 \begin{matrix}
 \theta_{k+1}\\
@@ -62,18 +120,26 @@ $$
 \omega_{\text{bias},k}
 \end{matrix}
 \right]
-$$<p>となり，以下のように表現します。</p><p>$$
+$$
+となり，以下のように表現します。
+$$
 x_{k+1}=Ax_k+Bu_k+v_k
-$$</p><p>$$
+$$
+$$
 y_k=Cx_k+w_k
-$$</p><p>$v_k,\ w_k$はそれぞれシステム雑音と観測雑音です。
-このシステムに対してKalman Filterを適用します。</p><p>予測ステップで事前状態推定値$\hat x_{k}^-$と事前誤差共分散行列$P_k^{-}$を更新します。$P_{k-1}$は事後誤差共分散行列，$V$はシステム雑音の共分散行列です。</p>$$
+$$
+$v_k,\ w_k$はそれぞれシステム雑音と観測雑音です。
+このシステムに対してKalman Filterを適用します。
+予測ステップで事前状態推定値$\hat x_{k}^-$と事前誤差共分散行列$P_k^{-}$を更新します。$P_{k-1}$は事後誤差共分散行列，$V$はシステム雑音の共分散行列です。
+$$
 \hat x_{k}^- = A\hat x_{k-1}+Bu_{k-1}
 $$
 $$
 P^{-}_k = AP_{k-1}A^\text{T}+V
-$$<p>フィルタリングステップではカルマンゲイン$G_k$，状態推定値$\hat x_k$，事後誤差共分散行列$P_k$を更新します。
-$W$は観測雑音の共分散行列です。</p>$$
+$$
+フィルタリングステップではカルマンゲイン$G_k$，状態推定値$\hat x_k$，事後誤差共分散行列$P_k$を更新します。
+$W$は観測雑音の共分散行列です。
+$$
 G_k = \dfrac{P^-_kC^\text{T}}{CP^{-}_kC^\text{T} + W}
 $$
 $$
@@ -81,7 +147,10 @@ $$
 $$
 $$
 P_k = (I - G_kC)P^-_k
-$$<p>推定した$\hat x_k$から$\hat\theta_k$と$\hat\omega_k=\omega_k-\hat\omega_{\text{bias},k}$が求まります。</p><h3 id=5-実験結果>5. 実験結果</h3><div style=position:relative;padding-bottom:56.25%;height:0;overflow:hidden><iframe src=https://www.youtube.com/embed/ZBS4nwo4Kak style=position:absolute;top:0;left:0;width:100%;height:100%;border:0 allowfullscreen title="YouTube Video"></iframe></div><p>ゲインの調整がなかなか難しく，ふらつきがみられます。</p></div><footer class=post__footer><div class="post__tags tags clearfix"><svg class="tags__badge icon icon-tag" width="16" height="16" viewBox="0 0 32 32"><path d="M32 19c0 1-1 2-1 2L21 31s-1 1-2 1-2-1-2-1L2 16c-1-1-1.4-2-1.4-2S0 12.5.0 11V3C0 1.5.8.8.8.8S1.5.0 3 0h8c1.5.0 3 .6 3 .6S15 1 16 2l15 15s1 1 1 2zM7 10a3 3 0 100-6 3 3 0 000 6z"/></svg><ul class=tags__list><li class=tags__item><a class="tags__link btn" href=/tags/%E5%88%B6%E5%BE%A1%E5%B7%A5%E5%AD%A6/ rel=tag>制御工学</a></li><li class=tags__item><a class="tags__link btn" href=/tags/%E5%80%92%E7%AB%8B%E6%8C%AF%E5%AD%90/ rel=tag>倒立振子</a></li></ul></div></footer></article></main><div class="authorbox clearfix"><figure class=authorbox__avatar><img alt="Teruru avatar" src=/img/avatar.jpeg class=avatar height=90 width=90></figure><div class=authorbox__header><span class=authorbox__name>About Teruru</span></div><div class=authorbox__description>電子工作、制御、プログラミング（C, C++, Python）によるものつくりをまとめていきます。</div></div><nav class="pager flex"><div class="pager__item pager__item--prev"><a class=pager__link href=/post/2022-07-16-self-solving-rubiks-cube/ rel=prev><span class=pager__subtitle>«&#8201;Previous</span><p class=pager__title>ルービックキューブを揃えるロボットの製作</p></a></div><div class="pager__item pager__item--next"><a class=pager__link href=/post/2022-07-22-magnetism_calibration/ rel=next><span class=pager__subtitle>Next&#8201;»</span><p class=pager__title>地磁気センサのキャリブレーションをする</p></a></div></nav></div><aside class=sidebar><div class="widget-search widget"><form class=widget-search__form role=search method=get action=https://google.com/search><label><input class=widget-search__field type=search placeholder=SEARCH… name=q aria-label=SEARCH…></label>
+$$
+推定した$\hat x_k$から$\hat\theta_k$と$\hat\omega_k=\omega_k-\hat\omega_{\text{bias},k}$が求まります。
+### 5. 実験結果<div style=position:relative;padding-bottom:56.25%;height:0;overflow:hidden><iframe src=https://www.youtube.com/embed/ZBS4nwo4Kak style=position:absolute;top:0;left:0;width:100%;height:100%;border:0 allowfullscreen title="YouTube Video"></iframe></div>ゲインの調整がなかなか難しく，ふらつきがみられます。
+ダイナミクスを考えずに瞬間的な入力を考えたので，その影響があるかもしれません。</div><footer class=post__footer><div class="post__tags tags clearfix"><svg class="tags__badge icon icon-tag" width="16" height="16" viewBox="0 0 32 32"><path d="M32 19c0 1-1 2-1 2L21 31s-1 1-2 1-2-1-2-1L2 16c-1-1-1.4-2-1.4-2S0 12.5.0 11V3C0 1.5.8.8.8.8S1.5.0 3 0h8c1.5.0 3 .6 3 .6S15 1 16 2l15 15s1 1 1 2zM7 10a3 3 0 100-6 3 3 0 000 6z"/></svg><ul class=tags__list><li class=tags__item><a class="tags__link btn" href=/tags/%E5%88%B6%E5%BE%A1%E5%B7%A5%E5%AD%A6/ rel=tag>制御工学</a></li><li class=tags__item><a class="tags__link btn" href=/tags/%E5%80%92%E7%AB%8B%E6%8C%AF%E5%AD%90/ rel=tag>倒立振子</a></li></ul></div></footer></article></main><div class="authorbox clearfix"><figure class=authorbox__avatar><img alt="Teruru avatar" src=/img/avatar.jpeg class=avatar height=90 width=90></figure><div class=authorbox__header><span class=authorbox__name>About Teruru</span></div><div class=authorbox__description>電子工作、制御、プログラミング（C, C++, Python）によるものつくりをまとめていきます。</div></div><nav class="pager flex"><div class="pager__item pager__item--prev"><a class=pager__link href=/post/2022-07-16-self-solving-rubiks-cube/ rel=prev><span class=pager__subtitle>«&#8201;Previous</span><p class=pager__title>ルービックキューブを揃えるロボットの製作</p></a></div><div class="pager__item pager__item--next"><a class=pager__link href=/post/2022-07-22-magnetism_calibration/ rel=next><span class=pager__subtitle>Next&#8201;»</span><p class=pager__title>地磁気センサのキャリブレーションをする</p></a></div></nav></div><aside class=sidebar><div class="widget-search widget"><form class=widget-search__form role=search method=get action=https://google.com/search><label><input class=widget-search__field type=search placeholder=SEARCH… name=q aria-label=SEARCH…></label>
 <input class=widget-search__submit type=submit value=Search>
 <input type=hidden name=sitesearch value=https://teruru-52.github.io/></form></div><div class="widget-recent widget"><h4 class=widget__title>Recent Posts</h4><div class=widget__content><ul class=widget__list><li class=widget__item><a class=widget__link href=/post/2023-07-19-ekf-quaternion/>EKFでクォータニオンを推定する</a></li><li class=widget__item><a class=widget__link href=/post/2023-06-03-propeller-pendulum/>プロペラを用いた倒立振子の製作</a></li><li class=widget__item><a class=widget__link href=/post/2023-06-03-mft2023/>MFT2023 作品紹介</a></li><li class=widget__item><a class=widget__link href=/post/2023-01-07-slip-angle/>マイクロマウスの横滑り角の考え方</a></li><li class=widget__item><a class=widget__link href=/post/2022-07-22-magnetism_calibration/>地磁気センサのキャリブレーションをする</a></li></ul></div></div><div class="widget-categories widget"><h4 class=widget__title>Categories</h4><div class=widget__content><ul class=widget__list><li class=widget__item><a class=widget__link href=/categories/event/>Event</a></li><li class=widget__item><a class=widget__link href=/categories/%E6%8A%80%E8%A1%93%E8%B3%87%E6%96%99/>技術資料</a></li></ul></div></div><div class="widget-taglist widget"><h4 class=widget__title>Tags</h4><div class=widget__content><a class="widget-taglist__link widget__link btn" href=/tags/imu/ title=IMU>IMU</a>
 <a class="widget-taglist__link widget__link btn" href=/tags/raspberry-pi/ title="RASPBERRY PI">RASPBERRY PI</a>
