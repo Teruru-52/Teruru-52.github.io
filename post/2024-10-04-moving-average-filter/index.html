@@ -1,0 +1,83 @@
+<!doctype html><html class=no-js lang=en><head><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1"><meta http-equiv=x-ua-compatible content="IE=edge"><title>移動平均フィルタの設計 - Teruru Laboratory</title><script>(function(a,b){a[b]=a[b].replace("no-js","js")})(document.documentElement,"className")</script><meta name=description content="所望のフィルタ特性に合わせて，何回分の移動平均を取ればよいかを求めます。"><meta property="og:title" content="移動平均フィルタの設計"><meta property="og:description" content="所望のフィルタ特性に合わせて，何回分の移動平均を取ればよいかを求めます。"><meta property="og:type" content="article"><meta property="og:url" content="https://teruru-52.github.io/post/2024-10-04-moving-average-filter/"><meta property="article:section" content="post"><meta property="article:published_time" content="2024-10-04T13:11:53+09:00"><meta property="article:modified_time" content="2024-10-04T13:11:53+09:00"><link rel=preconnect href=https://fonts.gstatic.com crossorigin><link rel=dns-prefetch href=//fonts.googleapis.com><link rel=dns-prefetch href=//fonts.gstatic.com><link rel=stylesheet href="https://fonts.googleapis.com/css?family=Open+Sans:400,400i,700"><link rel=stylesheet href=/css/style.css><link rel="shortcut icon" href=/favicon.ico></head><body class=body><div class="container container--outer"><header class=header><div class="container header__container"><div class=logo><a class=logo__link href=/ title="Teruru Laboratory" rel=home><div class="logo__item logo__text"><div class=logo__title>Teruru Laboratory</div><div class=logo__tagline>No control, no life.</div></div></a></div><nav class=menu><button class=menu__btn aria-haspopup=true aria-expanded=false tabindex=0>
+<span class=menu__btn-title tabindex=-1>Menu</span></button><ul class=menu__list><li class=menu__item><a class=menu__link href=/><span class=menu__text>Home</span></a></li><li class=menu__item><a class=menu__link href=/about/><span class=menu__text>About</span></a></li><li class=menu__item><a class=menu__link href=/categories/><span class=menu__text>Categories</span></a></li><li class=menu__item><a class=menu__link href=/tags/><span class=menu__text>Tags</span></a></li></ul></nav></div></header><div class="wrapper flex"><div class=primary><main class=main role=main><article class=post><header class=post__header><h1 class=post__title>移動平均フィルタの設計</h1><div class="post__meta meta"><div class="meta__item-datetime meta__item"><svg class="meta__icon icon icon-time" width="16" height="14" viewBox="0 0 30 28"><path d="M15 0C7 0 1 6 1 14s6 14 14 14 14-6 14-14S23 0 15 0zm0 25C9 25 4 20 4 14S9 3 15 3s11 5 11 11-5 11-11 11zm1-18h-2v8.4l6.8 4.4L22 18l-6-3.8V7z"/></svg><time class=meta__text datetime=2024-10-04T13:11:53+09:00>October 04, 2024</time></div><div class="meta__item-categories meta__item"><svg class="meta__icon icon icon-category" width="16" height="16" viewBox="0 0 16 16"><path d="m7 2 1 2h8v11H0V2z"/></svg><span class=meta__text><a class=meta__link href=/categories/%E6%8A%80%E8%A1%93%E8%B3%87%E6%96%99/ rel=category>技術資料</a></span></div></div></header><div class="content post__content clearfix"><p>所望のフィルタ特性に合わせて，何回分の移動平均を取ればよいかを求めます。</p><p>移動平均フィルタはその理解のし易さ，実装のし易さから幅広く用いられていますが，何回分の移動平均を取るかは実験によって求めている事例が多くみられる（所感）ため，設計手法を記述していきます。</p><p><a href=https://dsp.stackexchange.com/questions/9966/what-is-the-cut-off-frequency-of-a-moving-average-filter>What is the cut-off frequency of a moving average filter?</a></p><p><a href=https://dsp.stackexchange.com/questions/28169/3db-cut-off-frequency-of-moving-average/28186#28186>3dB-Cut off frequency of moving average</a></p><p>を参考にしています．</p><script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.4/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script><script type=text/x-mathjax-config>
+    MathJax.Hub.Config({tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}});
+</script><h3 id=1-移動平均フィルタの伝達関数>1. 移動平均フィルタの伝達関数</h3><p>時刻$k$における移動平均フィルタの出力は，</p>\begin{align}
+y(k)&=\dfrac{1}{N}\sum_{i=k-N+1}^kx(i)\\
+&=\dfrac{1}{N}\big\{x(k-N+1)+x(k-N+2)+\cdots+x(k-1)+x(k)\big\}
+\end{align}<p>となります。$z$変換により伝達関数$G(z)$は，</p>\begin{align}
+Y(z)&=\dfrac{1}{N}(z^{-N+1}+z^{-N+2}+\cdots+z^{-1}+1)X(z)
+\end{align}
+\begin{align}
+G(z)=\dfrac{Y(z)}{X(z)}&=\dfrac{1}{N}(z^{-N+1}+z^{-N+2}+\cdots+z^{-1}+1)
+\end{align}<p>と求まります。例として2回，4回平均の例を以下に挙げます。</p><ul><li><p>2回平均
+\begin{align}
+G(z)&=\dfrac{1}{２}(z^{-1}+1)
+\end{align}</p></li><li><p>4回平均
+\begin{align}
+G(z)&=\dfrac{1}{4}(z^{-3}+z^{-2}+z^{-1}+1)
+\end{align}</p></li></ul><p>$N$が大きくなるほど項数が増えて伝達関数の計算が面倒に感じますが，非常に簡潔に整理することができます。</p>\begin{align}
+G(z)&=\dfrac{1}{N}(z^{-N+1}+z^{-N+2}+\cdots+z^{-1}+1)\\
+&=\dfrac{1}{N}\dfrac{(1-z^{-1})(z^{-N+1}+z^{-N+2}+\cdots+z^{-1}+1)}{1-z^{-1}}\\
+&=\dfrac{1}{N}\dfrac{1-z^{-N}}{1-z^{-1}}
+\end{align}<h3 id=2-周波数特性>2. 周波数特性</h3><h4 id=21-ゲイン特性>2.1 ゲイン特性</h4><p>周波数特性を調べるために，$z=e^{j\omega}$の変換を施します。
+$\omega$は正規化角周波数です。</p>\begin{align}
+G(j\omega)&=\dfrac{1}{N}\dfrac{1-e^{-j\omega N}}{1-e^{-j\omega}}\\
+&=\dfrac{1}{N}\dfrac{e^{-\frac{j\omega N}{2}}}{e^{-\frac{j\omega}{2}}}\frac{e^{\frac{j\omega N}{2}}-e^{\frac{-j\omega N}{2}}}{e^{\frac{j\omega}{2}}-e^{\frac{-j\omega}{2}}}\\
+&=\dfrac{1}{N}\dfrac{e^{-\frac{j\omega N}{2}}}{e^{-\frac{j\omega}{2}}}\frac{\sin\big(\frac{\omega N}{2}\big)}{\sin\big(\frac{\omega}{2}\big)}
+\end{align}
+\begin{align}
+|G(j\omega)|&=\dfrac{1}{N}\bigg|\frac{\sin\big(\frac{\omega N}{2}\big)}{\sin\big(\frac{\omega}{2}\big)}\bigg|
+\end{align}<p>よって，移動平均フィルタのゲイン$g(\omega)$は
+\begin{align}
+g(\omega)=20\log_{10}|G(j\omega)|
+\end{align}</p><p>となり，$\omega_c$をカットオフ角周波数とすると，$g(\omega_c)=-3$ [dB]近傍となるように$N$を求めればよいことになります。</p><h4 id=21-位相特性>2.1 位相特性</h4><p>位相遅れ$\phi(\omega)$は，伝達関数において</p>\begin{align}
+\dfrac{e^{-\frac{j\omega N}{2}}}{e^{-\frac{j\omega}{2}}}=e^{-\frac{j\omega(N-1)}{2}}
+\end{align}<p>であるから，</p>\begin{align}
+\phi(\omega)=-\dfrac{\omega(N-1)}{2}
+\end{align}<p>となります。</p><h3 id=3-設計>3. 設計</h3><p>$g(\omega_c)=-3$ [dB]近傍となるように$N$を求めていきます。
+\begin{align}
+g(\omega_c)=20\log_{10}|G(j\omega_c)|=-3
+\end{align}</p><p>となる$N$を求めればよいのですが，計算が容易ではありません。
+そのため，近似を使って$N$を求めていきます。</p><p>ここでは1つの手法として，$|G(j\omega)|$を$\omega=0$まわりのテイラー展開で2次近似します（$\omega$が高周波となる場合には注意 ）。
+\begin{align}
+h(\omega)=\frac{\sin\big(\frac{\omega N}{2}\big)}{\sin\big(\frac{\omega}{2}\big)}
+\end{align}
+とおき，導関数を求めると
+\begin{align}
+h'(\omega)=\frac{N\sin\big(\frac{\omega}{2}\big)\cos\big(\frac{\omega N}{2}\big)-\cos\big(\frac{\omega}{2}\big)\sin\big(\frac{\omega N}{2}\big)}{2\sin^2\big(\frac{\omega}{2}\big)}
+\end{align}</p>\begin{align}
+h''(\omega)=\cdots\ (\text{omission})
+\end{align}<p>となり，$\omega=0$において
+\begin{align}
+h(0)&=N\\
+h'(0)&=0\\
+h''(0)&=\dfrac{N(1-N^2)}{12}
+\end{align}</p><p>であるから，2次近似は
+\begin{align}
+|G(j\omega)|&\approx \dfrac{1}{N}\big(h(0)+h'(0)\omega+\dfrac{h''(0)}{2!}\omega^2\big)\\
+&=1+\dfrac{1-N^2}{24}\omega^2
+\end{align}</p><p>となります。よって，</p>\begin{align}
+|G(j\omega_c)|\approx1+\dfrac{1-N^2}{24}\omega_c^2=10^{-\frac{3}{20}}
+\end{align}
+\begin{align}
+\omega_c=\sqrt{\dfrac{24\times(1-10^{-\frac{3}{20}})}{N^2-1}}
+\end{align}
+\begin{align}
+N=\sqrt{1+\dfrac{24\times(1-10^{-\frac{3}{20}})}{\omega_c^2}}
+\end{align}<p>となり，$N$において小数点以下は切り上げすればよいことになります。</p><h3 id=6-例>6. 例</h3><p>カットオフ周波数$f_c=50$ [Hz]，サンプリング周波数$f_s=1000$ [Hz]について考えてみます。
+正規化角周波数は</p>\begin{align}
+\omega_c=2\pi\dfrac{f_c}{f_s}=0.3141...
+\end{align}<p>より，</p>\begin{align}
+N=\sqrt{1+\dfrac{24\times(1-10^{-\frac{3}{20}})}{\omega_c^2}}=8.4864...
+\end{align}<p>となり，切り上げによって$N=9$と求まります。</p><h3 id=5-まとめ>5. まとめ</h3><p>参考にした記事では，近似の精度をあげるために様々な手法が挙げられています。
+上述した設計法は2次近似した$\omega=0$から大きく離れる場合には注意が必要で，あくまで目安として使うべきだいうのが個人の見解です。
+近似の精度をあげるか，結局はボード線図をみて設計をするのが良いと思います。</p></div><footer class=post__footer><div class="post__tags tags clearfix"><svg class="tags__badge icon icon-tag" width="16" height="16" viewBox="0 0 32 32"><path d="M32 19c0 1-1 2-1 2L21 31s-1 1-2 1-2-1-2-1L2 16c-1-1-1.4-2-1.4-2S0 12.5.0 11V3C0 1.5.8.8.8.8S1.5.0 3 0h8c1.5.0 3 .6 3 .6S15 1 16 2l15 15s1 1 1 2zM7 10a3 3 0 100-6 3 3 0 000 6z"/></svg><ul class=tags__list><li class=tags__item><a class="tags__link btn" href=/tags/%E3%83%87%E3%82%A3%E3%82%B8%E3%82%BF%E3%83%AB%E4%BF%A1%E5%8F%B7%E5%87%A6%E7%90%86/ rel=tag>ディジタル信号処理</a></li></ul></div></footer></article></main><div class="authorbox clearfix"><figure class=authorbox__avatar><img alt="Teruru avatar" src=/img/avatar.jpeg class=avatar height=90 width=90></figure><div class=authorbox__header><span class=authorbox__name>About Teruru</span></div><div class=authorbox__description>電子工作，制御，プログラミング（C, C++, Python）によるものつくりをまとめていきます。</div></div><nav class="pager flex"><div class="pager__item pager__item--prev"><a class=pager__link href=/post/2024-10-03-hamiltonian-based-trajectory/ rel=prev><span class=pager__subtitle>«&#8201;Previous</span><p class=pager__title>Pontryaginの最小原理を用いた軌道生成</p></a></div></nav></div><aside class=sidebar><div class="widget-search widget"><form class=widget-search__form role=search method=get action=https://google.com/search><label><input class=widget-search__field type=search placeholder=SEARCH… name=q aria-label=SEARCH…></label>
+<input class=widget-search__submit type=submit value=Search>
+<input type=hidden name=sitesearch value=https://teruru-52.github.io/></form></div><div class="widget-recent widget"><h4 class=widget__title>Recent Posts</h4><div class=widget__content><ul class=widget__list><li class=widget__item><a class=widget__link href=/post/2024-10-04-moving-average-filter/>移動平均フィルタの設計</a></li><li class=widget__item><a class=widget__link href=/post/2024-10-03-hamiltonian-based-trajectory/>Pontryaginの最小原理を用いた軌道生成</a></li><li class=widget__item><a class=widget__link href=/post/2023-10-18-z-transform/>Z変換を用いた正弦波の生成</a></li><li class=widget__item><a class=widget__link href=/post/2023-08-31-rubiks-cube-pattern/>ルービックキューブのパターン生成</a></li><li class=widget__item><a class=widget__link href=/post/2023-07-19-ekf-quaternion/>EKFでクォータニオンを推定する</a></li></ul></div></div><div class="widget-categories widget"><h4 class=widget__title>Categories</h4><div class=widget__content><ul class=widget__list><li class=widget__item><a class=widget__link href=/categories/event/>Event</a></li><li class=widget__item><a class=widget__link href=/categories/works/>Works</a></li><li class=widget__item><a class=widget__link href=/categories/%E6%8A%80%E8%A1%93%E8%B3%87%E6%96%99/>技術資料</a></li></ul></div></div><div class="widget-taglist widget"><h4 class=widget__title>Tags</h4><div class=widget__content><a class="widget-taglist__link widget__link btn" href=/tags/rubiks-cube/ title="Rubik's Cube">Rubik's Cube</a>
+<a class="widget-taglist__link widget__link btn" href=/tags/%E3%83%87%E3%82%A3%E3%82%B8%E3%82%BF%E3%83%AB%E4%BF%A1%E5%8F%B7%E5%87%A6%E7%90%86/ title=ディジタル信号処理>ディジタル信号処理</a>
+<a class="widget-taglist__link widget__link btn" href=/tags/%E3%83%9E%E3%82%A4%E3%82%AF%E3%83%AD%E3%83%9E%E3%82%A6%E3%82%B9/ title=マイクロマウス>マイクロマウス</a>
+<a class="widget-taglist__link widget__link btn" href=/tags/%E5%80%92%E7%AB%8B%E6%8C%AF%E5%AD%90/ title=倒立振子>倒立振子</a>
+<a class="widget-taglist__link widget__link btn" href=/tags/%E5%88%B6%E5%BE%A1%E5%B7%A5%E5%AD%A6/ title=制御工学>制御工学</a>
+<a class="widget-taglist__link widget__link btn" href=/tags/%E5%A7%BF%E5%8B%A2%E6%8E%A8%E5%AE%9A/ title=姿勢推定>姿勢推定</a>
+<a class="widget-taglist__link widget__link btn" href=/tags/%E8%BB%8C%E9%81%93%E7%94%9F%E6%88%90/ title=軌道生成>軌道生成</a></div></div></aside></div><footer class=footer><div class="container footer__container flex"><div class=footer__copyright>&copy; 2024 Teruru Laboratory.
+<span class=footer__copyright-credits>Generated with <a href=https://gohugo.io/ rel="nofollow noopener" target=_blank>Hugo</a> and <a href=https://github.com/Vimux/Mainroad/ rel="nofollow noopener" target=_blank>Mainroad</a> theme.</span></div></div></footer></div><script async defer src=/js/menu.js></script></body></html>
